@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevTools Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .code-display {
+            background: #1e1e1e;
+            color: #e1e1e1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 2px solid #333;
+        }
+
+        .api-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .request-section, .response-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .method-url {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .method-select {
+            width: 120px;
+        }
+
+        .utility-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .utility-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .utility-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .utility-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
+        .btn-group button {
+            flex: 1;
+            padding: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .api-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DevTools Suite</h1>
+        <p class="subtitle">Simple developer productivity tools</p>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('starter')">Code Starters</button>
+            <button class="tab-btn" onclick="showTab('api')">API Tester</button>
+            <button class="tab-btn" onclick="showTab('utils')">Utilities</button>
+        </div>
+
+        <!-- Code Starters Tab -->
+        <div id="starter" class="tab-content active">
+            <div class="form-group">
+                <label for="template-select">Select Template:</label>
+                <select id="template-select">
+                    <option value="smtp">SMTP Email Sender</option>
+                    <option value="bs4">BeautifulSoup Web Scraper</option>
+                    <option value="selenium-simple">Selenium Simple</option>
+                    <option value="selenium-existing">Selenium Existing Browser</option>
+                </select>
+            </div>
+            
+            <button onclick="generateCode()">Show Code</button>
+            
+            <div id="code-output" class="code-display" style="display: none;"></div>
+        </div>
+
+        <!-- API Tester Tab -->
+        <div id="api" class="tab-content">
+            <div class="api-section">
+                <div class="request-section">
+                    <h3>Request</h3>
+                    
+                    <div class="method-url">
+                        <select id="method" class="method-select">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="PATCH">PATCH</option>
+                        </select>
+                        <input type="url" id="url" placeholder="https://httpbin.org/get">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="headers">Headers (JSON):</label>
+                        <textarea id="headers" rows="4" placeholder='{"Content-Type": "application/json"}'></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="body">Body:</label>
+                        <textarea id="body" rows="6" placeholder='{"key": "value"}'></textarea>
+                    </div>
+                    
+                    <button onclick="sendRequest()">Send Request</button>
+                </div>
+                
+                <div class="response-section">
+                    <h3>Response</h3>
+                    <div id="response-output" class="code-display" style="min-height: 300px;">
+                        Response will appear here...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Utilities Tab -->
+        <div id="utils" class="tab-content">
+            <div class="utility-grid">
+                <!-- SHA-256 Hash Generator -->
+                <div class="utility-card">
+                    <h3>SHA-256 Hash</h3>
+                    <div class="form-group">
+                        <input type="text" id="hash-input" placeholder="Enter text to hash">
+                    </div>
+                    <button onclick="generateHash()">Generate Hash</button>
+                    <div class="form-group">
+                        <input type="text" id="hash-output" readonly placeholder="Hash will appear here">
+                    </div>
+                </div>
+                
+                <!-- Base64 Encoder/Decoder -->
+                <div class="utility-card">
+                    <h3>Base64 Encoder/Decoder</h3>
+                    <div class="form-group">
+                        <textarea id="b64-input" rows="3" placeholder="Enter text"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button onclick="encodeBase64()">Encode</button>
+                        <button onclick="decodeBase64()">Decode</button>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="b64-output" rows="3" readonly placeholder="Result will appear here"></textarea>
+                    </div>
+                </div>
+                
+                <!-- JSON Formatter -->
+                <div class="utility-card">
+                    <h3>JSON Formatter</h3>
+                    <div class="form-group">
+                        <textarea id="json-input" rows="4" placeholder='{"key":"value","array":[1,2,3]}'></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button onclick="formatJson()">Format</button>
+                        <button onclick="minifyJson()">Minify</button>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="json-output" rows="4" readonly placeholder="Formatted JSON will appear here"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Code templates
+        const codeTemplates = {
+            smtp: `"""
+SMTP Email Sender
+Simple email sending with Python's smtplib
+"""
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_email(smtp_server, port, email, password, to_email, subject, message):
+    try:
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = email
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(message, 'plain'))
+        
+        # Connect and send
+        server = smtplib.SMTP(smtp_server, port)
+        server.starttls()
+        server.login(email, password)
+        server.send_message(msg)
+        server.quit()
+        
+        print("Email sent successfully!")
+        return True
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+# Usage example
+if __name__ == "__main__":
+    send_email(
+        smtp_server="smtp.gmail.com",
+        port=587,
+        email="your_email@gmail.com",
+        password="your_app_password",
+        to_email="recipient@example.com",
+        subject="Test Email",
+        message="Hello from Python!"
+    )`,
+
+            bs4: `"""
+BeautifulSoup Web Scraper
+Simple web scraping with requests and BeautifulSoup
+"""
+import requests
+from bs4 import BeautifulSoup
+import json
+
+def scrape_website(url):
+    try:
+        # Send request
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        # Parse HTML
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Extract data
+        data = {
+            'title': soup.find('title').get_text() if soup.find('title') else 'No title',
+            'headings': [h.get_text().strip() for h in soup.find_all(['h1', 'h2', 'h3'])],
+            'paragraphs': [p.get_text().strip() for p in soup.find_all('p')],
+            'links': [{'text': a.get_text().strip(), 'href': a.get('href')} 
+                     for a in soup.find_all('a', href=True)]
+        }
+        
+        return data
+    except Exception as e:
+        print(f"Error scraping {url}: {e}")
+        return None
+
+# Usage example
+if __name__ == "__main__":
+    url = "https://httpbin.org/html"
+    data = scrape_website(url)
+    
+    if data:
+        print(json.dumps(data, indent=2))`,
+
+            'selenium-simple': `"""
+Simple Selenium Web Automation
+Basic web automation with Selenium WebDriver
+"""
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+def setup_driver(chromedriver_path="chromedriver.exe", headless=False):
+    options = Options()
+    if headless:
+        options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    
+    service = Service(chromedriver_path)
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
+
+def automate_website():
+    driver = setup_driver()
+    wait = WebDriverWait(driver, 10)
+    
+    try:
+        # Navigate to website
+        driver.get("https://httpbin.org/forms/post")
+        
+        # Fill form
+        driver.find_element(By.NAME, "custname").send_keys("John Doe")
+        driver.find_element(By.NAME, "custtel").send_keys("1234567890")
+        driver.find_element(By.NAME, "custemail").send_keys("john@example.com")
+        
+        # Take screenshot
+        driver.save_screenshot("form_filled.png")
+        print("Form filled and screenshot taken!")
+        
+        # Wait before closing
+        time.sleep(2)
+        
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        driver.quit()
+
+# Usage
+if __name__ == "__main__":
+    automate_website()`,
+
+            'selenium-existing': `"""
+Selenium with Existing Browser
+Connect to already opened Chrome browser
+
+SETUP:
+1. Open Command Prompt
+2. Navigate to Chrome folder: cd "C:\\Program Files\\Google\\Chrome\\Application"
+3. Run: chrome.exe --remote-debugging-port=8989 --user-data-dir="C:\\temp\\chromeprofile"
+4. Run this script
+"""
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+def connect_to_existing_browser(chromedriver_path, debug_port=8989):
+    try:
+        options = Options()
+        options.add_experimental_option("debuggerAddress", f"localhost:{debug_port}")
+        
+        service = Service(chromedriver_path)
+        driver = webdriver.Chrome(service=service, options=options)
+        
+        print(f"Connected to existing browser!")
+        print(f"Current URL: {driver.current_url}")
+        return driver
+        
+    except Exception as e:
+        print(f"Connection failed: {e}")
+        return None
+
+def automate_existing_browser():
+    # Update path to your chromedriver
+    chromedriver_path = "C:\\\\path\\\\to\\\\chromedriver.exe"
+    
+    driver = connect_to_existing_browser(chromedriver_path)
+    if not driver:
+        return
+    
+    try:
+        # Navigate to website
+        driver.get("https://httpbin.org/")
+        
+        # Take screenshot
+        driver.save_screenshot("existing_browser.png")
+        print("Automation completed!")
+        
+        time.sleep(2)
+        
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # Disconnect (browser stays open)
+        driver.quit()
+
+# Usage
+if __name__ == "__main__":
+    automate_existing_browser()`
+        };
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Code generator
+        function generateCode() {
+            const template = document.getElementById('template-select').value;
+            const codeOutput = document.getElementById('code-output');
+            
+            codeOutput.textContent = codeTemplates[template];
+            codeOutput.style.display = 'block';
+        }
+
+        // API Tester
+        async function sendRequest() {
+            const method = document.getElementById('method').value;
+            const url = document.getElementById('url').value;
+            const headersText = document.getElementById('headers').value;
+            const body = document.getElementById('body').value;
+            const responseOutput = document.getElementById('response-output');
+            
+            if (!url) {
+                responseOutput.textContent = 'Please enter a URL';
+                return;
+            }
+            
+            responseOutput.textContent = 'Sending request...';
+            
+            try {
+                const options = {
+                    method: method,
+                    mode: 'cors'
+                };
+                
+                // Add headers
+                if (headersText.trim()) {
+                    try {
+                        options.headers = JSON.parse(headersText);
+                    } catch (e) {
+                        responseOutput.textContent = 'Invalid JSON in headers';
+                        return;
+                    }
+                }
+                
+                // Add body for non-GET requests
+                if (method !== 'GET' && body.trim()) {
+                    options.body = body;
+                }
+                
+                const startTime = Date.now();
+                const response = await fetch(url, options);
+                const endTime = Date.now();
+                
+                const responseText = await response.text();
+                
+                let result = `Status: ${response.status} ${response.statusText}\n`;
+                result += `Time: ${endTime - startTime}ms\n`;
+                result += `Headers: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}\n\n`;
+                
+                try {
+                    const jsonData = JSON.parse(responseText);
+                    result += JSON.stringify(jsonData, null, 2);
+                } catch (e) {
+                    result += responseText;
+                }
+                
+                responseOutput.textContent = result;
+                
+            } catch (error) {
+                responseOutput.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // SHA-256 Hash
+        async function generateHash() {
+            const input = document.getElementById('hash-input').value;
+            const output = document.getElementById('hash-output');
+            
+            if (!input) {
+                output.value = 'Please enter text to hash';
+                return;
+            }
+            
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            output.value = hashHex;
+        }
+
+        // Base64 functions
+        function encodeBase64() {
+            const input = document.getElementById('b64-input').value;
+            const output = document.getElementById('b64-output');
+            
+            if (!input) {
+                output.value = 'Please enter text to encode';
+                return;
+            }
+            
+            try {
+                output.value = btoa(unescape(encodeURIComponent(input)));
+            } catch (error) {
+                output.value = `Error: ${error.message}`;
+            }
+        }
+
+        function decodeBase64() {
+            const input = document.getElementById('b64-input').value;
+            const output = document.getElementById('b64-output');
+            
+            if (!input) {
+                output.value = 'Please enter base64 to decode';
+                return;
+            }
+            
+            try {
+                output.value = decodeURIComponent(escape(atob(input)));
+            } catch (error) {
+                output.value = `Error: Invalid Base64`;
+            }
+        }
+
+        // JSON functions
+        function formatJson() {
+            const input = document.getElementById('json-input').value;
+            const output = document.getElementById('json-output');
+            
+            if (!input) {
+                output.value = 'Please enter JSON to format';
+                return;
+            }
+            
+            try {
+                const parsed = JSON.parse(input);
+                output.value = JSON.stringify(parsed, null, 2);
+            } catch (error) {
+                output.value = `Error: Invalid JSON - ${error.message}`;
+            }
+        }
+
+        function minifyJson() {
+            const input = document.getElementById('json-input').value;
+            const output = document.getElementById('json-output');
+            
+            if (!input) {
+                output.value = 'Please enter JSON to minify';
+                return;
+            }
+            
+            try {
+                const parsed = JSON.parse(input);
+                output.value = JSON.stringify(parsed);
+            } catch (error) {
+                output.value = `Error: Invalid JSON - ${error.message}`;
+            }
+        }
+
+        // Set default URL for API tester
+        document.getElementById('url').value = 'https://httpbin.org/get';
+    </script>
+</body>
+</html>
